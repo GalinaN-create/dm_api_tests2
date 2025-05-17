@@ -13,7 +13,7 @@ class LoginApi:
     def post_v1_account_login(
             self,
             json_data
-            ):
+    ):
         """
         Authenticate via credentials
         :param json_data:

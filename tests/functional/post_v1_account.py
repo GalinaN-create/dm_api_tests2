@@ -1,4 +1,3 @@
-import pprint
 from json import loads
 
 from dm_api_account.apis.account_api import AccountApi
@@ -11,9 +10,10 @@ def test_post_v1_account():
     account_api = AccountApi(host='http://5.63.153.31:5051')
     login_api = LoginApi(host='http://5.63.153.31:5051')
     mailhog_api = MailhogApi(host='http://5.63.153.31:5025')
-    login = 'gmavlyutova33'
+    login = 'gmavlyutova38'
     email = f'{login}@mail.ru'
     password = '1234567890'
+    email_2 = f'S{email}'
 
     json_data = {
         'login': login,
@@ -29,7 +29,6 @@ def test_post_v1_account():
 
     response = mailhog_api.get_api_v2_messages()
     print(response.status_code)
-    # pprint.pprint(response.json())
     assert response.status_code == 200, "Письма не получены"
 
     # Получение активационного токена
@@ -43,7 +42,7 @@ def test_post_v1_account():
     print(response.status_code)
     assert response.status_code == 200, "Пользователь не активирован"
 
-    # # Авторизация
+    # Авторизация
 
     json_data = {
         'login': login,
@@ -52,15 +51,53 @@ def test_post_v1_account():
     }
     response = login_api.post_v1_account_login(json_data=json_data)
     print(response.status_code)
-    # print(response.json())
     assert response.status_code == 200, "Пользователь не авторизован"
 
     # Изменение почты
 
-    # попытка авторизоваться после изменения почты
+    new_email = {
+        "login": login,
+        "password": password,
+        "email": email_2
+    }
+
+    response = account_api.put_v1_account_email(json_data=new_email)
+    print(response.status_code)
+    assert response.status_code == 200, "Почта пользователя не изменена"
+
+    # Попытка авторизоваться после изменения почты
+
+    response = login_api.post_v1_account_login(json_data=json_data)
+    print(response.status_code)
+    assert response.status_code == 403, "Авторизовались без активации токена при смене почты, а не должны"
+
+    # Получение писем с почты
+
+    response = mailhog_api.get_api_v2_messages()
+    print(response.status_code)
+    assert response.status_code == 200, "Письма не получены"
+
     # На почте находим токен по новому емейлу для подтверждения смены емейла
+
+    token2 = get_token_by_login(login, response)
+    assert token2 is not None, "Токен с этим пользователем не найден"
+
     # Активируем этот токен
-    # Логинимся
+
+    response = account_api.put_v1_account_token(token=token2)
+    print(response.status_code)
+    assert response.status_code == 200, "Пользователь не активирован"
+
+    # Логинимся после изменения почты и активации токена
+
+    json_data = {
+        'login': login,
+        'password': password,
+        'rememberMe': True,
+    }
+    response = login_api.post_v1_account_login(json_data=json_data)
+    print(response.status_code)
+    assert response.status_code == 200, "Пользователь не авторизован"
 
 
 def get_token_by_login(
