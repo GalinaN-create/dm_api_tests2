@@ -21,5 +21,9 @@ class MailhogApi:
         params = {
             'limit': limit,
         }
-        response = requests.get(url=f'{self.host}/api/v2/messages', params=params, verify=False)
+        response = requests.get(
+            url=f'{self.host}/api/v2/messages',
+            params=params,
+            verify=False
+        )
         return response
