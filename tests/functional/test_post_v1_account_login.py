@@ -5,15 +5,14 @@ from dm_api_account.apis.login_api import LoginApi
 from mailhog_api.apis.mailhog_api import MailhogApi
 
 
-def test_post_v1_account():
+def test_post_v1_account_login():
     # Регистрация пользователя
     account_api = AccountApi(host='http://5.63.153.31:5051')
     login_api = LoginApi(host='http://5.63.153.31:5051')
     mailhog_api = MailhogApi(host='http://5.63.153.31:5025')
-    login = 'gmavlyutova45'
+    login = 'gmavlyutova46'
     email = f'{login}@mail.ru'
     password = '1234567890'
-    email_2 = f'S{email}'
 
     # Регистрация пользователя
 
@@ -37,6 +36,23 @@ def test_post_v1_account():
 
     token = get_token_by_login(login, response)
     assert token is not None, "Токен с этим пользователем не найден"
+
+    # Активация пользователя
+
+    response = account_api.put_v1_account_token(token=token)
+    print(response.status_code)
+    assert response.status_code == 200, "Пользователь не активирован"
+
+    # Авторизация
+
+    json_data = {
+        'login': login,
+        'password': password,
+        'rememberMe': True,
+    }
+    response = login_api.post_v1_account_login(json_data=json_data)
+    print(response.status_code)
+    assert response.status_code == 200, "Пользователь не авторизован"
 
 
 def get_token_by_login(
