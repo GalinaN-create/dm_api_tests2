@@ -5,6 +5,7 @@ from mailhog_api.apis.mailhog_api import MailhogApi
 import structlog
 from restclient.configuration import Configuration as DmApiConfiguration
 from restclient.configuration import Configuration as MailhogConfiguration
+import random
 
 # Настройка логов
 structlog.configure(
@@ -25,7 +26,7 @@ def test_put_v1_account_token():
     # Регистрация пользователя
     account_api = AccountApi(dm_api_configuration)
     mailhog_api = MailhogApi(mailhog_configuration)
-    login = 'gmavlyutova83'
+    login = f'gmavlyutova{random.uniform(1000, 9999)}'
     email = f'{login}@mail.ru'
     password = '1234567890'
 

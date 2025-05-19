@@ -7,6 +7,7 @@ from dm_api_account.apis.login_api import LoginApi
 from mailhog_api.apis.mailhog_api import MailhogApi
 from restclient.configuration import Configuration as DmApiConfiguration
 from restclient.configuration import Configuration as MailhogConfiguration
+import random
 
 structlog.configure(
     processors=[
@@ -27,7 +28,7 @@ def test_post_v1_account_login():
     account_api = AccountApi(dm_api_configuration)
     login_api = LoginApi(dm_api_configuration)
     mailhog_api = MailhogApi(mailhog_configuration)
-    login = 'gmavlyutova81'
+    login = f'gmavlyutova{random.uniform(1000, 9999)}'
     email = f'{login}@mail.ru'
     password = '1234567890'
 
