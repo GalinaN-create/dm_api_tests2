@@ -25,7 +25,7 @@ def test_put_v1_account_token():
     # Регистрация пользователя
     account_api = AccountApi(dm_api_configuration)
     mailhog_api = MailhogApi(mailhog_configuration)
-    login = 'gmavlyutova66'
+    login = 'gmavlyutova70'
     email = f'{login}@mail.ru'
     password = '1234567890'
 
