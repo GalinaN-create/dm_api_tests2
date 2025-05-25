@@ -7,18 +7,18 @@ from services.mailhog_api import MailHogApi
 
 def retry_if_result_none(
         result
-        ):
+):
     """Return True if we should retry (in this case when result is None), False otherwise"""
     return result is None
 
 
 def retrier(
         function
-        ):
+):
     def wrapper(
             *args,
             **kwargs
-            ):
+    ):
         token = None
         count = 0
         while token is None:
@@ -74,22 +74,7 @@ class AccountHelper:
             'password': password,
             'rememberMe': remember_me,
         }
-        response = self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
-        assert response.status_code == 200, "Токен не активирован"
-
-    def login_no_activate_user(
-            self,
-            login: str,
-            password: str,
-            remember_me: bool = True
-    ):
-        json_data = {
-            'login': login,
-            'password': password,
-            'rememberMe': remember_me,
-        }
-        response = self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
-        assert response.status_code == 403, "Авторизовались без активации токена при смене почты, а не должны"
+        return self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
 
     def update_email(
             self,
