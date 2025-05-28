@@ -23,17 +23,13 @@ structlog.configure(
 )
 
 
-def test_post_v1_account_login():
-    dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
-    mailhog_configuration = MailhogConfiguration(host='http://5.63.153.31:5025')
-
-    # Регистрация пользователя
-    account = DmApiAccount(configuration=dm_api_configuration)
-    mailhog = MailHogApi(configuration=mailhog_configuration)
-    account_helper = AccountHelper(dm_api_account=account, mailhog_api=mailhog)
-    login = f'gmavlyutova{random.randint(1000, 9999)}'
-    email = f'{login}@mail.ru'
-    password = '1234567890'
+def test_post_v1_account_login(
+        account_helper,
+        prepare_user
+        ):
+    login = prepare_user.login
+    password = prepare_user.password
+    email = prepare_user.email
 
     token = account_helper.register_new_user(login=login, password=password, email=email)
     account_helper.activate_token(token=token)

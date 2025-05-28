@@ -49,13 +49,39 @@ def account_helper(
     return account_helper
 
 
-@pytest.fixture
+# @pytest.fixture(scope="session")
+# def auth_account_helper(
+#         mailhog_api,
+#         prepare_user
+# ):
+#     dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
+#     account = DmApiAccount(configuration=dm_api_configuration)
+#     account_helper = AccountHelper(dm_api_account=account, mailhog_api=mailhog_api)
+#     account_helper.auth_client(login=prepare_user.login, password=prepare_user.password)
+#     return account_helper
+
+@pytest.fixture(scope="session")
+def auth_new_account_get_token_reset_password(
+        mailhog_api,
+        prepare_user
+):
+    dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
+    account = DmApiAccount(configuration=dm_api_configuration)
+    account_helper = AccountHelper(dm_api_account=account, mailhog_api=mailhog_api)
+    token = account_helper.auth_new_client(login=prepare_user.login, password=prepare_user.password, email=prepare_user.email)
+
+
+    return account_helper, token
+
+
+@pytest.fixture(scope="session")
 def prepare_user():
     now = datetime.datetime.now()
     data = now.strftime("%d_%m_%Y_%H_%M_%S")
     login = f'gmavlyutova{data}'
     email = f'{login}@mail.ru'
     password = '1234567890'
-    User = namedtuple('User', ['login', 'password', 'email'])
-    user = User(login=login, password=password, email=email)
+    new_password = f'{password}!'
+    User = namedtuple('User', ['login', 'password', 'email', 'old_password', 'new_password'])
+    user = User(login=login, password=password, old_password=password, email=email, new_password=new_password)
     return user
