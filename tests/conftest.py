@@ -77,7 +77,7 @@ def auth_new_account_get_token_reset_password(
 @pytest.fixture()
 def prepare_user():
     now = datetime.datetime.now()
-    data = now.strftime("%d_%m_%Y_%H_%M_%S")
+    data = now.strftime("%d_%m_%Y_%H_%M_%S_%f")[:-3]
     login = f'gmavlyutova{data}'
     email = f'{login}@mail.ru'
     password = '1234567890'
