@@ -149,7 +149,7 @@ class AccountHelper:
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
-    def update_password(
+    def change_password(
             self,
             login: str,
             old_password: str,

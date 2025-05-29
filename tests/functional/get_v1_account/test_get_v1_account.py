@@ -3,3 +3,8 @@ def test_get_v1_account(
 ):
     account_helper.dm_api_account.account_api.get_v1_account()
 
+
+def test_get_v1_account_auth(
+        auth_account_helper
+):
+    auth_account_helper.dm_api_account.account_api.get_v1_account()
