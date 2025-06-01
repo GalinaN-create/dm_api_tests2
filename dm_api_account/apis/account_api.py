@@ -1,14 +1,24 @@
 import requests
 
+from restclient.client import RestClient
 
-class AccountApi:
-    def __init__(
+
+class AccountApi(RestClient):
+
+    def get_v1_account(
             self,
-            host,
-            headers=None
+            **kwargs
     ):
-        self.host = host
-        self.headers = headers
+        """
+        Get current user
+        :param **kwargs
+        :return:
+        """
+        response = self.get(
+            path=f'/v1/account',
+            **kwargs
+        )
+        return response
 
     def post_v1_account(
             self,
@@ -19,8 +29,8 @@ class AccountApi:
         :param json_data:
         :return:
         """
-        response = requests.post(
-            url=f'{self.host}/v1/account',
+        response = self.post(
+            path=f'/v1/account',
             json=json_data
         )
         return response
@@ -34,8 +44,8 @@ class AccountApi:
         :param token:
         :return:
         """
-        response = requests.put(
-            url=f'{self.host}/v1/account/{token}'
+        response = self.put(
+            path=f'/v1/account/{token}'
         )
         return response
 
@@ -47,8 +57,38 @@ class AccountApi:
         Change registered user email
         :return:
         """
-        response = requests.put(
-            url=f'{self.host}/v1/account/email',
+        response = self.put(
+            path=f'/v1/account/email',
+            json=json_data
+        )
+        return response
+
+    def put_v1_account_password(
+            self,
+            json_data,
+            **kwargs
+    ):
+        """
+        Change registered user password
+        :return:
+        """
+        response = self.put(
+            path=f'/v1/account/password',
+            json=json_data,
+            **kwargs
+        )
+        return response
+
+    def post_v1_account_password(
+            self,
+            json_data
+    ):
+        """
+        Reset registered user password
+        :return:
+        """
+        response = self.post(
+            path=f'/v1/account/password',
             json=json_data
         )
         return response
