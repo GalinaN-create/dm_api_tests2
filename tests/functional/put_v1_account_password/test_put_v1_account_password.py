@@ -1,5 +1,5 @@
 def test_put_v1_account_password(
-        auth_new_account_get_token_reset_password,
+        auth_new_account_helper,
         account_helper,
         prepare_user
 ):

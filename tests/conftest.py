@@ -60,16 +60,18 @@ def auth_account_helper(
     account_helper.auth_client(login="gmav", password="1234567890")
     return account_helper
 
+
 @pytest.fixture()
-def auth_new_account_get_token_reset_password(
+def auth_new_account_helper(
         mailhog_api,
         prepare_user
 ):
     dm_api_configuration = DmApiConfiguration(host='http://5.63.153.31:5051', disable_log=False)
     account = DmApiAccount(configuration=dm_api_configuration)
     account_helper = AccountHelper(dm_api_account=account, mailhog_api=mailhog_api)
-    token = account_helper.auth_new_client(login=prepare_user.login, password=prepare_user.password, email=prepare_user.email)
-
+    token = account_helper.auth_new_client(
+        login=prepare_user.login, password=prepare_user.password, email=prepare_user.email
+        )
 
     return account_helper, token
 
@@ -84,5 +86,7 @@ def prepare_user():
     email_2 = f'!{email}'
     new_password = f'{password}!'
     User = namedtuple('User', ['login', 'password', 'email', 'old_password', 'new_password', 'email_2'])
-    user = User(login=login, password=password, old_password=password, email=email, new_password=new_password, email_2=email_2)
+    user = User(
+        login=login, password=password, old_password=password, email=email, new_password=new_password, email_2=email_2
+        )
     return user

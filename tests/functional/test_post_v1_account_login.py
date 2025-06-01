@@ -8,4 +8,4 @@ def test_post_v1_account_login(
 
     token = account_helper.register_new_user(login=login, password=password, email=email)
     account_helper.activate_token(token=token)
-    account_helper.login_activate_user(login=login, password=password)
+    account_helper.login_user(login=login, password=password)

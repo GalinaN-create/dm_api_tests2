@@ -22,7 +22,6 @@ class LoginApi(RestClient):
 
     def delete_v1_account_login(
             self,
-            json_data,
             **kwargs
     ):
         """
@@ -33,14 +32,12 @@ class LoginApi(RestClient):
         """
         response = self.delete(
             path=f'/v1/account/login',
-            json=json_data,
             **kwargs
         )
         return response
 
     def delete_v1_account_login_all(
             self,
-            json_data,
             **kwargs
     ):
         """
@@ -50,7 +47,6 @@ class LoginApi(RestClient):
         """
         response = self.delete(
             path=f'/v1/account/login/all',
-            json=json_data,
             **kwargs
         )
         return response

@@ -68,22 +68,8 @@ class AccountHelper:
     ):
         token_email = self.register_new_user(login=login, password=password, email=email)
         self.activate_token(token=token_email)
-        response = self.dm_api_account.login_api.post_v1_account_login(
-            json_data={
-                'login': login,
-                'password': password,
-                'rememberMe': True
-            }
-        )
-        token = {
-            "x-dm-auth-token": response.headers["x-dm-auth-token"]
-        }
-        self.dm_api_account.account_api.set_headers(token)
-        self.dm_api_account.login_api.set_headers(token)
-        return token
+        self.auth_client(login=login, password=password)
 
-
-    @retry(stop_max_delay=10000, retry_on_result=retry_if_result_none)
     def register_new_user(
             self,
             login: str,
@@ -104,7 +90,7 @@ class AccountHelper:
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
-    def login_activate_user(
+    def login_user(
             self,
             login: str,
             password: str,
@@ -161,7 +147,7 @@ class AccountHelper:
             'email': email
         }
         self.dm_api_account.account_api.post_v1_account_password(json_data=send_email)
-        token = self.get_token_reset_password(login=login)
+        token = self.get_token_by_login(login=login)
         new_pass = {
             "login": login,
             "token": token,
@@ -182,21 +168,9 @@ class AccountHelper:
         for item in response.json()['items']:
             data = loads(item['Content']['Body'])
             login_data = data['Login']
-            if login_data == login:
-                token = data['ConfirmationLinkUrl'].split('/')[-1]
-            return token
-        return None
-
-    @retrier
-    def get_token_reset_password(self, login):
-        response = self.mailhog_api.mailhog_api.get_api_v2_messages()
-        assert response.status_code == 200, "Письма не получены"
-        token = None
-        for item in response.json()['items']:
-            data = loads(item['Content']['Body'])
-            login_data = data['Login']
-            val = data['ConfirmationLinkUri'].split('/')[3]
-            if login_data == login and data['ConfirmationLinkUri'].split('/')[3] == 'password':
+            if login_data == login and 'ConfirmationLinkUri' in data:
                 token = data['ConfirmationLinkUri'].split('/')[-1]
+            elif login_data == login and 'ConfirmationLinkUrl' in data:
+                token = data['ConfirmationLinkUrl'].split('/')[-1]
             return token
         return None
