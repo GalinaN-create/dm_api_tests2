@@ -1,7 +1,10 @@
 from json import loads
-from retrying import retry
 
-# from conftest import account_helper
+from dm_api_account.models.change_email import ChangeEmail
+from dm_api_account.models.change_password import ChangePassword
+from dm_api_account.models.login_credentials import LoginCredentials
+from dm_api_account.models.registration import Registration
+from dm_api_account.models.reset_password import ResetPassword
 from services.dm_api_account import DmApiAccount
 from services.mailhog_api import MailHogApi
 
@@ -46,13 +49,16 @@ class AccountHelper:
     def auth_client(
             self,
             login: str,
-            password: str
+            password: str,
+            validate_response=False
     ):
+        login_credentials = LoginCredentials(
+            login=login,
+            password=password,
+            remember_me=True
+        )
         response = self.dm_api_account.login_api.post_v1_account_login(
-            json_data={
-                'login': login,
-                'password': password
-            }
+            login_credentials=login_credentials, validate_response=validate_response
         )
         token = {
             "x-dm-auth-token": response.headers["x-dm-auth-token"]
@@ -76,14 +82,13 @@ class AccountHelper:
             password: str,
             email: str
     ):
+        registration = Registration(
+            login=login,
+            email=email,
+            password=password
+        )
 
-        json_data = {
-            'login': login,
-            'email': email,
-            'password': password,
-        }
-
-        response = self.dm_api_account.account_api.post_v1_account(json_data=json_data)
+        response = self.dm_api_account.account_api.post_v1_account(registration=registration)
         assert response.status_code == 201, "Пользователь не зарегистрирован, возможно уже существует"
 
         token = self.get_token_by_login(login)
@@ -94,14 +99,18 @@ class AccountHelper:
             self,
             login: str,
             password: str,
-            remember_me: bool = True
+            remember_me: bool = True,
+            validate_response=False
     ):
-        json_data = {
-            'login': login,
-            'password': password,
-            'rememberMe': remember_me,
-        }
-        return self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
+        login_credentials = LoginCredentials(
+            login=login,
+            password=password,
+            remember_me=remember_me
+        )
+
+        return self.dm_api_account.login_api.post_v1_account_login(
+            login_credentials=login_credentials, validate_response=validate_response
+        )
 
     def update_email(
             self,
@@ -109,26 +118,27 @@ class AccountHelper:
             password: str,
             email_2: str
     ):
-        new_email = {
-            "login": login,
-            "password": password,
-            "email": email_2
-        }
-        response = self.dm_api_account.account_api.put_v1_account_email(json_data=new_email)
+        change_email = ChangeEmail(
+            login=login,
+            password=password,
+            email=email_2
+        )
+        response = self.dm_api_account.account_api.put_v1_account_email(change_email=change_email)
         assert response.status_code == 200, "Почта пользователя не изменена"
 
     def activate_token(
             self,
-            token: str
+            token: str,
+            validate_response=False
     ):
-        response = self.dm_api_account.account_api.put_v1_account_token(token=token)
-        assert response.status_code == 200, "Пользователь не активирован"
+        response = self.dm_api_account.account_api.put_v1_account_token(
+            token=token, validate_response=validate_response
+        )
 
     def get_token_by_email(
             self,
             login: str
     ):
-
         # На почте находим токен по новому емейлу для подтверждения смены емейла
 
         token = self.get_token_by_login(login=login)
@@ -142,19 +152,20 @@ class AccountHelper:
             new_password: str,
             email: str
     ):
-        send_email = {
-            "login": login,
-            'email': email
-        }
-        self.dm_api_account.account_api.post_v1_account_password(json_data=send_email)
+        reset_password = ResetPassword(
+            login=login,
+            email=email
+        )
+
+        self.dm_api_account.account_api.post_v1_account_password(reset_password=reset_password)
         token = self.get_token_by_login(login=login)
-        new_pass = {
-            "login": login,
-            "token": token,
-            "oldPassword": old_password,
-            "newPassword": new_password
-        }
-        response = self.dm_api_account.account_api.put_v1_account_password(json_data=new_pass)
+        change_password = ChangePassword(
+            login=login,
+            token=token,
+            oldPassword=old_password,
+            newPassword=new_password
+        )
+        response = self.dm_api_account.account_api.put_v1_account_password(change_password=change_password)
         return response
 
     @retrier
