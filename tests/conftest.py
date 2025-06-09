@@ -83,10 +83,9 @@ def prepare_user():
     login = f'gmavlyutova{data}'
     email = f'{login}@mail.ru'
     password = '1234567890'
-    email_2 = f'!{email}'
     new_password = f'{password}!'
-    User = namedtuple('User', ['login', 'password', 'email', 'old_password', 'new_password', 'email_2'])
+    User = namedtuple('User', ['login', 'password', 'email', 'old_password', 'new_password'])
     user = User(
-        login=login, password=password, old_password=password, email=email, new_password=new_password, email_2=email_2
+        login=login, password=password, old_password=password, email=email, new_password=new_password
         )
     return user

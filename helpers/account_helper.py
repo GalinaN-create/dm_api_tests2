@@ -116,12 +116,12 @@ class AccountHelper:
             self,
             login: str,
             password: str,
-            email_2: str
+            email: str
     ):
         change_email = ChangeEmail(
             login=login,
             password=password,
-            email=email_2
+            email=f'!{email}'
         )
         response = self.dm_api_account.account_api.put_v1_account_email(change_email=change_email)
         assert response.status_code == 200, "Почта пользователя не изменена"
