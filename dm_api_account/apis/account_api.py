@@ -26,7 +26,7 @@ class AccountApi(RestClient):
             **kwargs
         )
         if response.status_code == 200:
-            UserDetailsEnvelope(**response.json())
+            return UserDetailsEnvelope(**response.json())
         return response
 
     def post_v1_account(
