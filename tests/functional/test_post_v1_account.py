@@ -1,7 +1,7 @@
 import pytest
 
 from checkers.http_checkers import check_status_code_http
-from conftest import prepare_user
+# from conftest import prepare_user
 
 
 @pytest.mark.parametrize('login, email, password', [
