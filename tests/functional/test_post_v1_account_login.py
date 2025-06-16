@@ -8,6 +8,8 @@ from hamcrest import assert_that, \
     starts_with, \
     has_properties
 
+from checkers.post_v1_account_login import PostV1AccountLogin
+
 
 def test_post_v1_account_login(
         account_helper,
@@ -20,23 +22,6 @@ def test_post_v1_account_login(
     token = account_helper.register_new_user(login=login, password=password, email=email)
     account_helper.activate_token(token=token)
     response = account_helper.login_user(login=login, password=password, validate_response=True)
-    # return response
-    assert_that(
-        response, all_of(
-            has_property(
-                "resource", has_property("login", starts_with("gmavlyutova"))
-            ),
-            has_property("resource", has_property("registration", instance_of(datetime))),
-            has_property(
-                "resource", has_property(
-                    "rating", has_properties(
-                        {
-                            "enabled": equal_to(True),
-                            "quality": equal_to(0),
-                            "quantity": equal_to(0)
-                        }
-                    )
-                    )
-                )
-        )
-    )
+    PostV1AccountLogin.check_response_values(response)
+
+
