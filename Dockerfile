@@ -1,6 +1,6 @@
-FROM python:latest
+FROM python:3.9-slim
 
 COPY . .
 RUN pip3 install -r requirements.txt
 
-CMD pytest/tests
+CMD ["pytest", "tests/"]
