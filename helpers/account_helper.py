@@ -1,5 +1,7 @@
 from json import loads
 
+import allure
+
 from dm_api_account.models.change_email import ChangeEmail
 from dm_api_account.models.change_password import ChangePassword
 from dm_api_account.models.login_credentials import LoginCredentials
@@ -76,6 +78,7 @@ class AccountHelper:
         self.activate_token(token=token_email)
         self.auth_client(login=login, password=password)
 
+    @allure.step("Регистрация нового пользователя")
     def register_new_user(
             self,
             login: str,
@@ -95,6 +98,7 @@ class AccountHelper:
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
+    @allure.step("Авторизация пользователя")
     def login_user(
             self,
             login: str,
@@ -116,6 +120,7 @@ class AccountHelper:
             assert response.headers["x-dm-auth-token"], 'Проблема с токеном'
         return response
 
+    @allure.step("Изменение почты пользователя")
     def update_email(
             self,
             login: str,
@@ -130,6 +135,7 @@ class AccountHelper:
         response = self.dm_api_account.account_api.put_v1_account_email(change_email=change_email)
         assert response.status_code == 200, "Почта пользователя не изменена"
 
+    @allure.step("Активация токена")
     def activate_token(
             self,
             token: str,
@@ -139,6 +145,7 @@ class AccountHelper:
             token=token, validate_response=validate_response
         )
 
+    @allure.step("Получение токена после изменения почты")
     def get_token_by_email(
             self,
             login: str
@@ -149,6 +156,7 @@ class AccountHelper:
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
+    @allure.step("Изменение пароля")
     def change_password(
             self,
             login: str,
@@ -172,6 +180,7 @@ class AccountHelper:
         response = self.dm_api_account.account_api.put_v1_account_password(change_password=change_password)
         return response
 
+    @allure.step("Получение токена по логину")
     @retrier
     def get_token_by_login(
             self,

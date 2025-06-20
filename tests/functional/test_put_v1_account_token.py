@@ -1,3 +1,7 @@
+import allure
+
+
+@allure.title("Активация токена")
 def test_put_v1_account_token(
         account_helper,
         prepare_user

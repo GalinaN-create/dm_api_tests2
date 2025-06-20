@@ -1,3 +1,4 @@
+import allure
 import requests
 
 from dm_api_account.models.login_credentials import LoginCredentials
@@ -25,6 +26,7 @@ class LoginApi(RestClient):
             return UserEnvelope(**response.json())
         return response
 
+    @allure.step("Выход из системы под текущим пользователем")
     def delete_v1_account_login(
             self,
             **kwargs
@@ -41,6 +43,7 @@ class LoginApi(RestClient):
         )
         return response
 
+    @allure.step("Выход из системы со всех устройств")
     def delete_v1_account_login_all(
             self,
             **kwargs

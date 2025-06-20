@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import allure
 import pytest
 from hamcrest import assert_that, \
     starts_with
@@ -7,14 +8,16 @@ from hamcrest import assert_that, \
 from checkers.http_checkers import check_status_code_http
 
 
+@allure.title("Регистрация нового пользователя")
 @pytest.mark.parametrize(
     'login, email, password', [
         ('g', 'gmav@mail.ru', '12345678Qwe!'),
         ('gmavlyutova', 'gmavmail.ru', '12345678Qwe!'),
         ('gmavlyutova', 'gmav@mail.ru', '1')
     ]
-    )
+)
 def test_post_v1_account(
+        self,
         account_helper,
         login,
         email,

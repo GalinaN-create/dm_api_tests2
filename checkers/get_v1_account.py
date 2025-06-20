@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import allure
 from hamcrest import assert_that, \
     all_of, \
     has_property, \
@@ -11,6 +12,7 @@ from hamcrest import assert_that, \
 
 class GetV1Account:
 
+    @allure.step("Проверка ответа")
     def check_response_values(
             response
     ):
