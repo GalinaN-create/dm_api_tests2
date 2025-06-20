@@ -39,7 +39,7 @@ jobs:
     needs: test
     name: Generate report
     steps:
-      - uses: action/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
           java-version: '17'
