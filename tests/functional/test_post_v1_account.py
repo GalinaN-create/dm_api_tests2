@@ -8,7 +8,6 @@ from hamcrest import assert_that, \
 from checkers.http_checkers import check_status_code_http
 
 
-@allure.title("Регистрация нового пользователя")
 @pytest.mark.parametrize(
     'login, email, password', [
         ('g', 'gmav@mail.ru', '12345678Qwe!'),
@@ -16,8 +15,8 @@ from checkers.http_checkers import check_status_code_http
         ('gmavlyutova', 'gmav@mail.ru', '1')
     ]
 )
+@allure.title("Регистрация нового пользователя")
 def test_post_v1_account(
-        self,
         account_helper,
         login,
         email,
