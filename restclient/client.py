@@ -1,11 +1,16 @@
 from http.client import responses
 from json import JSONDecodeError
 
+from requests import Response
+from requests.auth import HTTPBasicAuth
+from swagger_coverage_py.listener import CoverageListener
 import allure
 from requests import session
 import structlog
 import uuid
 import curlify
+from swagger_coverage_py.request_schema_handler import RequestSchemaHandler
+from swagger_coverage_py.uri import URI
 
 from restclient.configuration import Configuration
 from restclient.utilities import allure_attach
@@ -26,7 +31,7 @@ class RestClient:
     def set_headers(
             self,
             headers
-            ):
+    ):
         if headers:
             self.session.headers.update(headers)
 
@@ -94,6 +99,13 @@ class RestClient:
         rest_response.raise_for_status()
 
         curl = curlify.to_curl(rest_response.request)
+
+
+        uri = URI(host=self.host, base_path="", unformatted_path=path, uri_params=kwargs.get('params'))
+        RequestSchemaHandler(
+            uri, method.lower(), rest_response, kwargs
+        ).write_schema()
+
         print(curl)
 
         # Логируем ответ
