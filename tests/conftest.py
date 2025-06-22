@@ -1,20 +1,17 @@
+import os
+
 from swagger_coverage_py.reporter import CoverageReporter
-from requests.auth import HTTPBasicAuth
 import datetime
 from collections import namedtuple
-from json import loads
 from pathlib import Path
 from vyper import v
 
 import pytest
 
-from dm_api_account.apis.account_api import AccountApi
 from helpers.account_helper import AccountHelper
-from mailhog_api.apis.mailhog_api import MailhogApi
 import structlog
-from restclient.configuration import Configuration as DmApiConfiguration
-from restclient.configuration import Configuration as MailhogConfiguration
-import random
+from packages.restclient.configuration import Configuration as DmApiConfiguration
+from packages.restclient.configuration import Configuration as MailhogConfiguration
 from services.dm_api_account import DmApiAccount
 from services.mailhog_api import MailHogApi
 
@@ -33,7 +30,9 @@ options = (
     'service.dm_api_account',
     'service.mailhog_api',
     'user.login',
-    'user.password'
+    'user.password',
+    'telegram.chat_id',
+    'telegram.token'
 )
 
 
@@ -59,6 +58,10 @@ def set_config(
     v.read_in_config()
     for option in options:
         v.set(f"{option}", request.config.getoption(f"--{option}"))
+    os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get('telegram.chat_id')
+    os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
+    request.config.stash['telegram-notifier-addfields']['enviroments'] = config_name
+    request.config.stash['telegram-notifier-addfields']['report'] = "https://galinan-create.github.io/dm_api_tests2/"
 
 
 # Вычитываем все опции в конкретный объект vyper-config, которые хотим сохранить в переменной окружения pytest

@@ -1,6 +1,4 @@
-import requests
-
-from restclient.client import RestClient
+from packages.restclient.client import RestClient
 
 
 class MailhogApi(RestClient):
