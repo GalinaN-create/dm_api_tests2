@@ -7,5 +7,5 @@ user:
   password: '1234567890'
 
 telegram:
-  chat_id: '-1002679774566'
-  token: '7426744771:AAHqadA03JM-gXln0x5HNVAo3giXsJHrbWQ'
+  chat_id: -1002679774566
+  token: "7426744771:AAHqadA03JM-gXln0x5HNVAo3giXsJHrbWQ"

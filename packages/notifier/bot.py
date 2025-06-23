@@ -15,21 +15,21 @@ v.set_config_name('prod')
 v.add_config_path(config)
 v.read_in_config()
 
-os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get("telegram.chat_id")
-os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get("telegram.token")
+os.environ["TELEGRAM_BOT_CHAT_ID"] = "-1002679774566"
+os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = "7426744771:AAHqadA03JM-gXln0x5HNVAo3giXsJHrbWQ"
 
 
 def send_file(
         self
 ):
-    telegram_bot = TeleBot("telegram.token")
+    telegram_bot = TeleBot("7426744771:AAHqadA03JM-gXln0x5HNVAo3giXsJHrbWQ")
     file_path = Path(__file__).parent.joinpath('../../').joinpath("swagger-coverage-dm_api_account.html")
     with open(file_path,'rb') as document:
         telegram_bot.send_document(
-            v.get("telegram.chat_id"),
+            "-1002679774566",
             document=document,
             caption="coverage",
         )
-
+    # print(v.get("telegram.chat_id"))
 if __name__ == "__main__":
     send_file()
