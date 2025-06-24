@@ -81,8 +81,8 @@ def set_config(
     for option in options:
         v.set(f"{option}", request.config.getoption(f"--{option}"))
 
-    os.environ["TELEGRAM_BOT_CHAT_ID"] = "-1002679774566"
-    os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = "7426744771:AAHqadA03JM-gXln0x5HNVAo3giXsJHrbWQ"
+    os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get('telegram.chat_id')
+    os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
     print(f"Trying to send to chat_id: {os.getenv('TELEGRAM_BOT_CHAT_ID')}")
     print(f"Type of chat_id: {type(os.getenv('TELEGRAM_BOT_CHAT_ID'))}")
     request.config.stash['telegram-notifier-addfields']['enviroments'] = config_name
