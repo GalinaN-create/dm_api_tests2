@@ -114,7 +114,6 @@ class AccountHelper:
         )
         if validate_headers:
             assert response.headers["x-dm-auth-token"], 'Проблема с токеном'
-            assert response.status_code == 200, "Пользователь не найден"
         return response
 
     def update_email(

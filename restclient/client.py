@@ -69,6 +69,7 @@ class RestClient:
                 method=method,
                 url=full_url, **kwargs
             )
+            rest_response.raise_for_status()
             return rest_response
         # Логируем запрос
 
@@ -87,6 +88,7 @@ class RestClient:
             method=method,
             url=full_url, **kwargs
         )
+        rest_response.raise_for_status()
 
         curl = curlify.to_curl(rest_response.request)
         print(curl)
