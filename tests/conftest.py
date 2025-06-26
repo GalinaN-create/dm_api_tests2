@@ -1,3 +1,5 @@
+from swagger_coverage_py.reporter import CoverageReporter
+from requests.auth import HTTPBasicAuth
 import datetime
 from collections import namedtuple
 from json import loads
@@ -35,11 +37,21 @@ options = (
 )
 
 
+@pytest.fixture(scope="session", autouse=True)
+def setup_swagger_coverage():
+    reporter = CoverageReporter(api_name="dm-api-account", host="http://5.63.153.31:5051")
+    reporter.setup("/swagger/Account/swagger.json")
+
+    yield
+    reporter.generate_report()
+    reporter.cleanup_input_files()
+
+
 # Функция, устанавливающая конфиг - фикстура для запуска перед тестом и получения аргументов из pytest
 @pytest.fixture(scope="session", autouse=True)
 def set_config(
         request
-        ):
+):
     config = Path(__file__).joinpath("../../").joinpath("config")
     config_name = request.config.getoption("--env")
     v.set_config_name(config_name)
@@ -52,7 +64,7 @@ def set_config(
 # Вычитываем все опции в конкретный объект vyper-config, которые хотим сохранить в переменной окружения pytest
 def pytest_addoption(
         parser
-        ):
+):
     parser.addoption("--env", action="store", default="stg", help="run stg")
 
     for option in options:
