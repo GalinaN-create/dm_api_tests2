@@ -1,8 +1,11 @@
+import allure
+
 from checkers.get_v1_account import GetV1Account
 
 from checkers.http_checkers import check_status_code_http
 
 
+@allure.title("Попытка получения аккаунта без авторизации")
 def test_get_v1_account(
         account_helper
 ):
@@ -10,6 +13,7 @@ def test_get_v1_account(
         account_helper.dm_api_account.account_api.get_v1_account()
 
 
+@allure.title("Получение аккаунта с авторизацией")
 def test_get_v1_account_auth(
         auth_account_helper
 ):

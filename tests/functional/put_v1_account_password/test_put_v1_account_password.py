@@ -1,3 +1,7 @@
+import allure
+
+
+@allure.title("Изменение пароля")
 def test_put_v1_account_password(
         auth_new_account_helper,
         account_helper,
