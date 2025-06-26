@@ -16,10 +16,17 @@ class RestClient:
             configuration: Configuration
     ):
         self.host = configuration.host
-        self.headers = configuration.headers
+        self.set_headers(configuration.headers)
         self.disable_log = configuration.disable_log
         self.session = session()
         self.log = structlog.get_logger(__name__).bind(service='api')
+
+    def set_headers(
+            self,
+            headers
+            ):
+        if headers:
+            self.session.headers.update(headers)
 
     def get(
             self,
@@ -71,6 +78,7 @@ class RestClient:
             full_url=full_url,
             params=kwargs.get('params'),
             headers=kwargs.get('headers'),
+            json=kwargs.get('json'),
             data=kwargs.get('data')
         )
         # Выполняем запрос

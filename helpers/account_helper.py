@@ -1,6 +1,7 @@
 from json import loads
 from retrying import retry
 
+# from conftest import account_helper
 from services.dm_api_account import DmApiAccount
 from services.mailhog_api import MailHogApi
 
@@ -42,7 +43,33 @@ class AccountHelper:
         self.dm_api_account = dm_api_account
         self.mailhog_api = mailhog_api
 
-    @retry(stop_max_delay=10000, retry_on_result=retry_if_result_none)
+    def auth_client(
+            self,
+            login: str,
+            password: str
+    ):
+        response = self.dm_api_account.login_api.post_v1_account_login(
+            json_data={
+                'login': login,
+                'password': password
+            }
+        )
+        token = {
+            "x-dm-auth-token": response.headers["x-dm-auth-token"]
+        }
+        self.dm_api_account.account_api.set_headers(token)
+        self.dm_api_account.login_api.set_headers(token)
+
+    def auth_new_client(
+            self,
+            login: str,
+            password: str,
+            email: str
+    ):
+        token_email = self.register_new_user(login=login, password=password, email=email)
+        self.activate_token(token=token_email)
+        self.auth_client(login=login, password=password)
+
     def register_new_user(
             self,
             login: str,
@@ -63,7 +90,7 @@ class AccountHelper:
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
-    def login_activate_user(
+    def login_user(
             self,
             login: str,
             password: str,
@@ -108,6 +135,28 @@ class AccountHelper:
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
+    def change_password(
+            self,
+            login: str,
+            old_password: str,
+            new_password: str,
+            email: str
+    ):
+        send_email = {
+            "login": login,
+            'email': email
+        }
+        self.dm_api_account.account_api.post_v1_account_password(json_data=send_email)
+        token = self.get_token_by_login(login=login)
+        new_pass = {
+            "login": login,
+            "token": token,
+            "oldPassword": old_password,
+            "newPassword": new_password
+        }
+        response = self.dm_api_account.account_api.put_v1_account_password(json_data=new_pass)
+        return response
+
     @retrier
     def get_token_by_login(
             self,
@@ -119,7 +168,9 @@ class AccountHelper:
         for item in response.json()['items']:
             data = loads(item['Content']['Body'])
             login_data = data['Login']
-            if login_data == login:
-                token = data['ConfirmationLinkUrl'].split('/')[4]
+            if login_data == login and 'ConfirmationLinkUri' in data:
+                token = data['ConfirmationLinkUri'].split('/')[-1]
+            elif login_data == login and 'ConfirmationLinkUrl' in data:
+                token = data['ConfirmationLinkUrl'].split('/')[-1]
             return token
         return None
