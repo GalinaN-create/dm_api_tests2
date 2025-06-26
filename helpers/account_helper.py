@@ -100,7 +100,8 @@ class AccountHelper:
             login: str,
             password: str,
             remember_me: bool = True,
-            validate_response=False
+            validate_response=False,
+            validate_headers=False
     ):
         login_credentials = LoginCredentials(
             login=login,
@@ -108,9 +109,13 @@ class AccountHelper:
             remember_me=remember_me
         )
 
-        return self.dm_api_account.login_api.post_v1_account_login(
+        response = self.dm_api_account.login_api.post_v1_account_login(
             login_credentials=login_credentials, validate_response=validate_response
         )
+        if validate_headers:
+            assert response.headers["x-dm-auth-token"], 'Проблема с токеном'
+            assert response.status_code == 200, "Пользователь не найден"
+        return response
 
     def update_email(
             self,
