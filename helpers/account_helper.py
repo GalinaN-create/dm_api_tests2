@@ -1,7 +1,35 @@
 from json import loads
+from retrying import retry
 
 from services.dm_api_account import DmApiAccount
 from services.mailhog_api import MailHogApi
+
+
+def retry_if_result_none(
+        result
+):
+    """Return True if we should retry (in this case when result is None), False otherwise"""
+    return result is None
+
+
+def retrier(
+        function
+):
+    def wrapper(
+            *args,
+            **kwargs
+    ):
+        token = None
+        count = 0
+        while token is None:
+            print(f'Попытка получения токена - {count}')
+            token = function(*args, **kwargs)
+            count += 1
+            if count == 5:
+                raise AssertionError("Превышено количество попыток получения токена")
+        return token
+
+    return wrapper
 
 
 class AccountHelper:
@@ -14,6 +42,7 @@ class AccountHelper:
         self.dm_api_account = dm_api_account
         self.mailhog_api = mailhog_api
 
+    @retry(stop_max_delay=10000, retry_on_result=retry_if_result_none)
     def register_new_user(
             self,
             login: str,
@@ -30,10 +59,7 @@ class AccountHelper:
         response = self.dm_api_account.account_api.post_v1_account(json_data=json_data)
         assert response.status_code == 201, "Пользователь не зарегистрирован, возможно уже существует"
 
-        response = self.mailhog_api.mailhog_api.get_api_v2_messages()
-        assert response.status_code == 200, "Письма не получены"
-
-        token = self.get_token_by_login(login, response)
+        token = self.get_token_by_login(login)
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
@@ -48,22 +74,7 @@ class AccountHelper:
             'password': password,
             'rememberMe': remember_me,
         }
-        response = self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
-        assert response.status_code == 200, "Токен не активирован"
-
-    def login_no_activate_user(
-            self,
-            login: str,
-            password: str,
-            remember_me: bool = True
-    ):
-        json_data = {
-            'login': login,
-            'password': password,
-            'rememberMe': remember_me,
-        }
-        response = self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
-        assert response.status_code == 403, "Авторизовались без активации токена при смене почты, а не должны"
+        return self.dm_api_account.login_api.post_v1_account_login(json_data=json_data)
 
     def update_email(
             self,
@@ -89,22 +100,21 @@ class AccountHelper:
     def get_token_by_email(
             self,
             login: str
-            ):
-        response = self.mailhog_api.mailhog_api.get_api_v2_messages()
-        assert response.status_code == 200, "Письма не получены"
+    ):
 
         # На почте находим токен по новому емейлу для подтверждения смены емейла
 
-        token = self.get_token_by_login(login=login, response=response)
+        token = self.get_token_by_login(login=login)
         assert token is not None, "Токен с этим пользователем не найден"
         return token
 
-
-    @staticmethod
+    @retrier
     def get_token_by_login(
-            login,
-            response
+            self,
+            login
     ):
+        response = self.mailhog_api.mailhog_api.get_api_v2_messages()
+        assert response.status_code == 200, "Письма не получены"
         token = None
         for item in response.json()['items']:
             data = loads(item['Content']['Body'])
