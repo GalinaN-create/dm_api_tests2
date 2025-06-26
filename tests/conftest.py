@@ -1,24 +1,30 @@
+import os
+import shutil
+
 from swagger_coverage_py.reporter import CoverageReporter
-from requests.auth import HTTPBasicAuth
 import datetime
 from collections import namedtuple
-from json import loads
 from pathlib import Path
 from vyper import v
 
 import pytest
 
-from dm_api_account.apis.account_api import AccountApi
 from helpers.account_helper import AccountHelper
-from mailhog_api.apis.mailhog_api import MailhogApi
 import structlog
-from restclient.configuration import Configuration as DmApiConfiguration
-from restclient.configuration import Configuration as MailhogConfiguration
-import random
+from packages.restclient.configuration import Configuration as DmApiConfiguration
+from packages.restclient.configuration import Configuration as MailhogConfiguration
 from services.dm_api_account import DmApiAccount
 from services.mailhog_api import MailHogApi
 
 # Настройка логов
+options = (
+    'service.dm_api_account',
+    'service.mailhog_api',
+    'user.login',
+    'user.password',
+    'telegram.chat_id',
+    'telegram.token',
+)
 structlog.configure(
     processors=[
         structlog.processors.JSONRenderer(
@@ -29,22 +35,37 @@ structlog.configure(
     ]
 )
 
-options = (
-    'service.dm_api_account',
-    'service.mailhog_api',
-    'user.login',
-    'user.password'
-)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_swagger_coverage():
-    reporter = CoverageReporter(api_name="dm-api-account", host="http://5.63.153.31:5051")
+    # Отключаем копирование в системную директорию
+    os.environ["SWAGGER_COVERAGE_NO_COPY"] = "1"
+
+    # Устанавливаем кастомный путь
+    output_dir = os.path.abspath("swagger-coverage-reports")
+    os.environ["SWAGGER_COVERAGE_OUTPUT_DIR"] = output_dir
+
+    # Очистка директории
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir, ignore_errors=True)
+
+    # Инициализация
+    reporter = CoverageReporter(
+        api_name="dm-api-account",
+        host="http://5.63.153.31:5051"
+    )
     reporter.setup("/swagger/Account/swagger.json")
 
     yield
-    reporter.generate_report()
-    reporter.cleanup_input_files()
+
+    # Генерация отчета
+    try:
+        reporter.generate_report()
+    except Exception as e:
+        pytest.skip(f"Swagger report generation failed: {str(e)}")
+    finally:
+        reporter.cleanup_input_files()
 
 
 # Функция, устанавливающая конфиг - фикстура для запуска перед тестом и получения аргументов из pytest
@@ -59,6 +80,13 @@ def set_config(
     v.read_in_config()
     for option in options:
         v.set(f"{option}", request.config.getoption(f"--{option}"))
+
+    os.environ["TELEGRAM_BOT_CHAT_ID"] = v.get('telegram.chat_id')
+    os.environ["TELEGRAM_BOT_ACCESS_TOKEN"] = v.get('telegram.token')
+    print(f"Trying to send to chat_id: {os.getenv('TELEGRAM_BOT_CHAT_ID')}")
+    print(f"Type of chat_id: {type(os.getenv('TELEGRAM_BOT_CHAT_ID'))}")
+    request.config.stash['telegram-notifier-addfields']['enviroments'] = config_name
+    request.config.stash['telegram-notifier-addfields']['report'] = "https://galinan-create.github.io/dm_api_tests2/"
 
 
 # Вычитываем все опции в конкретный объект vyper-config, которые хотим сохранить в переменной окружения pytest

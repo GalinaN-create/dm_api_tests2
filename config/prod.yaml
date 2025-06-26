@@ -1,0 +1,11 @@
+service:
+  dm_api_account: 'http://5.63.153.31:5051'
+  mailhog_api: 'http://5.63.153.31:5025'
+
+user:
+  login: "gmavlyutova"
+  password: '1234567890'
+
+telegram:
+  chat_id: "-1002679774566"
+  token: "7426744771:AAHqadA03JM-gXln0x5HNVAo3giXsJHrbWQ"
